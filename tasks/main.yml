@@ -1,0 +1,5 @@
+- include: client.yml
+  when: client == true
+
+- include: server.yml
+  when: server == true

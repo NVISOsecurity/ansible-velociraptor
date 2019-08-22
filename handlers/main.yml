@@ -1,0 +1,10 @@
+---
+- name: reload velociraptor
+  systemd:
+    daemon_reload: yes
+    name: velociraptor
+
+- name: restart velociraptor
+  systemd:
+    state: restarted
+    name: velociraptor

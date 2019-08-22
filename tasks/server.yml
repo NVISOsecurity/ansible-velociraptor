@@ -1,0 +1,78 @@
+- name: Create Velociraptor directories
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - "{{ velociraptor_dir }}"
+    - "{{ velociraptor_config_dir }}"
+    - "{{ velociraptor_log_dir }}"
+
+- name: Download velociraptor binary
+  get_url:
+    url: https://github.com/Velocidex/velociraptor/releases/download/v0.3.2/velociraptor-v0.3.2-linux-amd64
+    dest: "{{ velociraptor_dir }}/velociraptor"
+    mode: '0750'
+
+- name: Generate velociraptor config
+  command: "{{ velociraptor_dir }}/velociraptor config generate"
+  register: config
+
+- name: create files folder
+  local_action: file path="{{ role_path}}/files" state directory
+
+- name: check if config exists
+  local_action: stat path="{{ role_path}}/files/{{ velociraptor_server_config }}"
+  register: config_exists
+
+- local_action: copy content="{{config.stdout }}" dest="{{ role_path}}/files/{{ velociraptor_server_config }}"
+  when: config_exists.stat.exists != true
+
+- name: "edit {{ role_path}}/files/{{ velociraptor_server_config }}"
+  replace:
+    path: "{{ role_path}}/files/{{ velociraptor_server_config }}"
+    regexp: "  - https://localhost:8000/"
+    replace: "  - https://{{ ansible_default_ipv4.address }}:8000/"
+  delegate_to: localhost
+
+- name: "edit {{ role_path}}/files/{{ velociraptor_server_config }}"
+  replace:
+    path: "{{ role_path}}/files/{{ velociraptor_server_config }}"
+    regexp: "  bind_address: 127.0.0.1"
+    replace: "  bind_address: 0.0.0.0"
+    after: "GUI:"
+    before: "  gw_certificate:"
+  delegate_to: localhost
+
+- name: copy velociraptor server config
+  copy:
+    dest: "{{ velociraptor_config_dir }}/{{ velociraptor_server_config }}"
+    src: "{{ role_path}}/files/{{ velociraptor_server_config }}"
+  notify: restart velociraptor
+
+- name: install pip3
+  apt:
+    name: python3-pip
+
+- name: pip install pexpect
+  pip:
+    name: pexpect
+
+- name: Case insensitive password string match
+  expect:
+    command: "/opt/velociraptor/velociraptor --config /etc/velociraptor/velociraptor.server.config.yml user add {{ velociraptor_admin_user }}"
+    responses:
+      (?i)Enter user's password: "{{ velociraptor_admin_password }}"
+
+- name: install velociraptor systemd configuration
+  template:
+    src: systemd-velociraptor.service.j2
+    dest: /lib/systemd/system/velociraptor.service
+    mode: '0644'
+  register: systemd
+  notify: reload velociraptor
+
+- name: enable and start velociraptor systemd service
+  service:
+    name: velociraptor
+    enabled: yes
+    state: 'started'

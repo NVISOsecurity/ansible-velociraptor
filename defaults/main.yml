@@ -1,0 +1,8 @@
+client: false
+server: false
+velociraptor_dir: /opt/velociraptor
+velociraptor_config_dir: /etc/velociraptor
+velociraptor_log_dir: /var/log/velociraptor
+velociraptor_server_config: velociraptor.server.config.yml
+velociraptor_admin_user: admin
+velociraptor_admin_password: admin
