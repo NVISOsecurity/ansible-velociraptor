@@ -13,18 +13,19 @@
     dest: "{{ velociraptor_dir }}/velociraptor"
     mode: '0750'
 
-- name: Generate velociraptor config
+- name: Generate velociraptor server config
   command: "{{ velociraptor_dir }}/velociraptor config generate"
   register: config
 
 - name: create files folder
-  local_action: file path="{{ role_path}}/files" state directory
+  local_action: file path="{{ role_path}}/files" state=directory
 
-- name: check if config exists
+- name: check if velociraptor server config exists
   local_action: stat path="{{ role_path}}/files/{{ velociraptor_server_config }}"
   register: config_exists
 
-- local_action: copy content="{{config.stdout }}" dest="{{ role_path}}/files/{{ velociraptor_server_config }}"
+- name: copy velociraptor server config locally
+  local_action: copy content="{{config.stdout }}" dest="{{ role_path}}/files/{{ velociraptor_server_config }}"
   when: config_exists.stat.exists != true
 
 - name: "edit {{ role_path}}/files/{{ velociraptor_server_config }}"
@@ -48,6 +49,18 @@
     dest: "{{ velociraptor_config_dir }}/{{ velociraptor_server_config }}"
     src: "{{ role_path}}/files/{{ velociraptor_server_config }}"
   notify: restart velociraptor
+
+- name: Generate velociraptor client config
+  command: "{{ velociraptor_dir }}/velociraptor -c {{ velociraptor_config_dir }}/{{ velociraptor_server_config }} config client"
+  register: clientconfig
+
+- name: check if velociraptor client config exists
+  local_action: stat path="{{ role_path}}/files/{{ velociraptor_client_config }}"
+  register: clientconfig_exists
+
+- name: copy velociraptor client config locally
+  local_action: copy content="{{clientconfig.stdout }}" dest="{{ role_path}}/files/{{ velociraptor_client_config }}"
+  when: clientconfig_exists.stat.exists != true
 
 - name: install pip3
   apt:

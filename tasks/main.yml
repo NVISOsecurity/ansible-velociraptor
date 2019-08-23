@@ -1,5 +1,9 @@
-- include: client.yml
-  when: client == true
+---
+- include: linux_client.yml
+  when: client == true and ansible_os_family != "Windows"
+
+- include: windows_client.yml
+  when: client == true and ansible_os_family == "Windows"
 
 - include: server.yml
   when: server == true

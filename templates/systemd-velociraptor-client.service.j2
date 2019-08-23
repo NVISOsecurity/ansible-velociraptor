@@ -1,0 +1,19 @@
+{{ ansible_managed | comment }}
+[Unit]
+Description=Velociraptor EDR
+After=network.target
+
+[Service]
+Type=simple
+ExecStart={{ velociraptor_dir }}/velociraptor --config {{ velociraptor_config_dir }}/{{ velociraptor_client_config }} client -v
+WorkingDirectory={{ velociraptor_dir }}
+Restart=always
+RestartSec=10
+StandardOutput=syslog
+SyslogIdentifier=velociraptor
+User=root
+Group=nogroup
+PrivateTmp=false
+
+[Install]
+WantedBy=multi-user.target

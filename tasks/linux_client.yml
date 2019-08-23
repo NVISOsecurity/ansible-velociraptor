@@ -1,0 +1,36 @@
+---
+- name: Create Velociraptor directories
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - "{{ velociraptor_dir }}"
+    - "{{ velociraptor_config_dir }}"
+    - "{{ velociraptor_log_dir }}"
+
+- name: Download velociraptor binary
+  get_url:
+    url: https://github.com/Velocidex/velociraptor/releases/download/v0.3.2/velociraptor-v0.3.2-linux-amd64
+    dest: "{{ velociraptor_dir }}/velociraptor"
+    mode: '0750'
+
+- name: copy velociraptor client config
+  copy:
+    dest: "{{ velociraptor_config_dir }}/{{ velociraptor_client_config }}"
+    src: "{{ role_path}}/files/{{ velociraptor_client_config }}"
+  notify: restart velociraptor-client
+
+- name: install velociraptor systemd configuration
+  template:
+    src: systemd-velociraptor-client.service.j2
+    dest: /lib/systemd/system/velociraptor-client.service
+    mode: '0644'
+  register: systemd
+  notify: reload velociraptor-client
+
+- name: enable and start velociraptor-client systemd service
+  service:
+    name: velociraptor-client
+    enabled: yes
+    state: 'started'
+

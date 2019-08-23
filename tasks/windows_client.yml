@@ -1,0 +1,19 @@
+---
+- name: Create directory
+  win_file:
+    path: "{{ _velociraptor_windows_dir }}"
+    state: directory
+
+- name: Get velociraptor msi
+  win_get_url:
+    url: "{{ velociraptor_msi_url }}"
+    dest: "{{ _velociraptor_windows_dir }}{{ velociraptor_msi }}"
+
+- name: Install velociraptor msi
+  win_package:
+    path: "{{ _velociraptor_windows_dir }}{{ velociraptor_msi }}"
+
+- name: Copy velociraptor client config
+  win_copy:
+    src: "{{ role_path}}/files/{{ velociraptor_client_config }}"
+    dest: "{{ _velociraptor_windows_dir }}{{ velociraptor_client_config }}"

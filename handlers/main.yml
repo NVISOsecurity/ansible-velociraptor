@@ -4,7 +4,17 @@
     daemon_reload: yes
     name: velociraptor
 
+- name: reload velociraptor-client
+  systemd:
+    daemon_reload: yes
+    name: velociraptor-client
+
 - name: restart velociraptor
   systemd:
     state: restarted
     name: velociraptor
+
+- name: restart velociraptor-client
+  systemd:
+    state: restarted
+    name: velociraptor-client

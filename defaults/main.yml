@@ -5,4 +5,8 @@ velociraptor_config_dir: /etc/velociraptor
 velociraptor_log_dir: /var/log/velociraptor
 velociraptor_server_config: velociraptor.server.config.yml
 velociraptor_admin_user: admin
-velociraptor_admin_password: admin
+velociraptor_admin_password: sec699
+velociraptor_client_config: Velociraptor.config.yaml
+velociraptor_msi_url: https://github.com/Velocidex/velociraptor/releases/download/v0.3.2/velociraptor-v0.3.2-windows-4.0-amd64.msi
+velociraptor_msi: velociraptor-v0.3.2-windows-4.0-amd64.msi
+_velociraptor_windows_dir: C:\Program Files\Velociraptor\
